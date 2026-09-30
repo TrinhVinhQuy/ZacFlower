@@ -83,6 +83,21 @@ const money = (n) => new Intl.NumberFormat("vi-VN").format(n) + "đ",
       .forEach(
         (e) => (e.textContent = readCart().reduce((s, x) => s + x.quantity, 0)),
       );
+function copyOrderText(text) {
+  const fallbackCopy = () => {
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.append(field);
+    field.select();
+    document.execCommand("copy");
+    field.remove();
+  };
+  if (!navigator.clipboard) return fallbackCopy();
+  navigator.clipboard.writeText(text).catch(fallbackCopy);
+}
 const add = (id) => {
   let c = readCart(),
     x = c.find((x) => x.id === id);
@@ -225,7 +240,7 @@ function checkout() {
       })
       .join("\n");
     const zaloMessage = `ĐƠN HOA MỚI\nKhách hàng: ${form.get("name")}\nSĐT: ${form.get("phone")}\nĐịa chỉ: ${form.get("address")}\nLời nhắn: ${form.get("note") || "Không có"}\n\nSản phẩm:\n${orderDetails}\n\nTổng thanh toán: ${money(s + ship)}`;
-    navigator.clipboard?.writeText(zaloMessage);
+    copyOrderText(zaloMessage);
     localStorage.removeItem("zac-flower-cart");
     badge();
     document.querySelector("#success-message").hidden = false;
@@ -242,6 +257,7 @@ function checkout() {
       zaloButton,
       document.querySelector("#success-message .btn"),
     );
+    window.open("https://zalo.me/0905163918", "_blank", "noopener");
   };
 }
 const commerceStyles = document.createElement("link");
